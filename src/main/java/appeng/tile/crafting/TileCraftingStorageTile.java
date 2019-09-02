@@ -36,11 +36,17 @@ public class TileCraftingStorageTile extends TileCraftingTile
 	protected ItemStack getItemFromTile( final Object obj )
 	{
 		final IBlocks blocks = AEApi.instance().definitions().blocks();
-		final int storage = ( (TileCraftingTile) obj ).getStorageBytes() / KILO_SCALAR;
+		final long storage = ( (TileCraftingTile) obj ).getStorageBytes() / KILO_SCALAR;
 
 		Optional<ItemStack> is;
 
-		switch( storage )
+		if(storage == Long.MAX_VALUE) {
+			is = blocks.craftingStorageCreative().maybeStack( 1 );
+			
+			return is.orElseGet( () -> super.getItemFromTile( obj ) );
+		}
+
+		switch( (int)storage )
 		{
 			case 1:
 				is = blocks.craftingStorage1k().maybeStack( 1 );
@@ -66,9 +72,6 @@ public class TileCraftingStorageTile extends TileCraftingTile
 			case 16384:
 				is = blocks.craftingStorage16384k().maybeStack( 1 );
 				break;
-			case Integer.MAX_VALUE:
-				is = blocks.craftingStorageCreative().maybeStack( 1 );
-				break;
 			default:
 				is = Optional.empty();
 				break;
@@ -90,7 +93,7 @@ public class TileCraftingStorageTile extends TileCraftingTile
 	}
 
 	@Override
-	public int getStorageBytes()
+	public long getStorageBytes()
 	{
 		if( this.world == null || this.notLoaded() || this.isInvalid() )
 		{
@@ -118,7 +121,7 @@ public class TileCraftingStorageTile extends TileCraftingTile
 			case STORAGE_16384K:
 				return 16384 * 1024;
 			case STORAGE_CREATIVE:
-				return Integer.MAX_VALUE;
+				return Long.MAX_VALUE;
 		}
 	}
 }
